@@ -7,22 +7,28 @@ import java.io.InputStreamReader
 import java.io.OutputStream
 import java.net.ServerSocket
 import java.net.Socket
+import java.net.SocketTimeoutException
 
 class ServerThread(private val handler: Handler) : Thread() {
 
     private val port = 2222
     private var serverSocket: ServerSocket? = null
+    // Tempo limite para aceitar uma conexão em milissegundos
+    private val CONNECTION_TIMEOUT = 10000 // 10 segundos
 
     override fun run() {
         try {
             serverSocket = ServerSocket(port)
 
             while (true) {
+                serverSocket?.soTimeout = CONNECTION_TIMEOUT
                 val clientSocket = serverSocket?.accept()
                 val clientHandler = ClientHandler(clientSocket!!, handler)
                 clientHandler.start()
             }
         } catch (e: IOException) {
+            e.printStackTrace()
+        } catch (e: SocketTimeoutException) {
             e.printStackTrace()
         }
     }
@@ -34,6 +40,10 @@ class ServerThread(private val handler: Handler) : Thread() {
                 clientSocket.receiveBufferSize = 20000
                 val reader = BufferedReader(InputStreamReader(inputStream))
                 val outputStream: OutputStream = clientSocket.getOutputStream()
+
+                // Configurar um timeout de leitura (em milissegundos)
+                val readTimeout = 10000 // 10 segundos
+                clientSocket.soTimeout = readTimeout
 
                 var line: String?
                 while (reader.readLine().also { line = it } != null) {
@@ -51,8 +61,12 @@ class ServerThread(private val handler: Handler) : Thread() {
                 }
 
                 clientSocket.close()
+            } catch (e: SocketTimeoutException) {
+                e.printStackTrace()
+                clientSocket.close()
             } catch (e: IOException) {
                 e.printStackTrace()
+                clientSocket.close()
             }
         }
 
