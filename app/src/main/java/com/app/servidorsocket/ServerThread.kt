@@ -13,13 +13,10 @@ class ServerThread(private val handler: Handler) : Thread() {
 
     private val port = 2222
     private var serverSocket: ServerSocket? = null
-    // Tempo limite para aceitar uma conexão em milissegundos
-    private val CONNECTION_TIMEOUT = 15000 // 15 segundos
 
     override fun run() {
         try {
             serverSocket = ServerSocket(port)
-            serverSocket?.soTimeout = CONNECTION_TIMEOUT
 
             while (true) {
                 val clientSocket = serverSocket?.accept()
