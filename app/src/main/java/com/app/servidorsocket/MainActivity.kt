@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
+import android.widget.Button
 import android.widget.TextView
 import java.net.InetAddress
 import java.net.NetworkInterface
@@ -15,6 +16,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var serverThread: ServerThread
     private lateinit var txtXml: TextView
     private lateinit var txtIpServer: TextView
+    private lateinit var btnLimpar: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,6 +24,7 @@ class MainActivity : AppCompatActivity() {
 
         txtXml = findViewById(R.id.txtXmlRecebido)
         txtIpServer = findViewById(R.id.txt_ipServer)
+        btnLimpar = findViewById(R.id.btnLimpar)
 
         // Inicializar o servidor em uma thread separada
         serverThread = ServerThread(Handler(Looper.getMainLooper(), handleMessage))
@@ -30,6 +33,10 @@ class MainActivity : AppCompatActivity() {
         // Capturar e exibir o endereço IP local
         val ipAddress = getLocalIpAddress()
         txtIpServer.text = "Endereço IP servidor: $ipAddress\nForneça esse endereço de IP no app Client"
+
+        btnLimpar.setOnClickListener {
+            txtXml.text = "Xml recebido do client"
+        }
     }
 
     private val handleMessage = Handler.Callback { msg ->
